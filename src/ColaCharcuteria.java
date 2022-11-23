@@ -23,8 +23,8 @@ public class ColaCharcuteria implements Runnable{
     public static Semaphore semaforoCarniceria = new Semaphore(4);
     public static Semaphore semaforoCharcuteria = new Semaphore(2);
 
-    public static boolean terminadoCarniceria=false;
-    public static boolean terminadoCharcuteria=false;
+    public static boolean atendidoCarniceria =false;
+    public static boolean atendidoCharcuteria =false;
 
 
     public static void carniceria(){
@@ -32,10 +32,9 @@ public class ColaCharcuteria implements Runnable{
         try {
             semaforoCarniceria.acquire();
             System.out.println("El "+ Thread.currentThread().getName() +" esta siendo atendido en la carniceria");
-            Thread.sleep(10000);
+            Thread.sleep(1000);
             System.out.println("El "+ Thread.currentThread().getName() +" ha terminado en la carniceria");
             semaforoCarniceria.release();
-            terminadoCarniceria=true;
 
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -47,10 +46,9 @@ public class ColaCharcuteria implements Runnable{
         try {
             semaforoCharcuteria.acquire();
             System.out.println("El "+ Thread.currentThread().getName() +" esta siendo atendido en la charcuteria");
-            Thread.sleep(10000);
+            Thread.sleep(1000);
             System.out.println("El "+ Thread.currentThread().getName() +" ha terminado en la charcuteria");
             semaforoCharcuteria.release();
-            terminadoCharcuteria=true;
 
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -60,19 +58,29 @@ public class ColaCharcuteria implements Runnable{
     @Override
     public void run() {
 
-        do {
+        while(!atendidoCarniceria && !atendidoCharcuteria) {
+            if(semaforoCarniceria.availablePermits()>0 && !atendidoCarniceria) {
+                carniceria();
+                if (!atendidoCharcuteria) {
+                    charcuteria();
+                    atendidoCharcuteria =true;
+                }
 
-            
-
-        } while(terminadoCarniceria == true || terminadoCharcuteria == true);
-
+            }else if (semaforoCharcuteria.availablePermits()>0 && !atendidoCharcuteria){
+                charcuteria();
+                if (!atendidoCarniceria){
+                    carniceria();
+                    atendidoCarniceria =true;
+                }
+            }
+        }
 
     }
 
     public static void main(String[] args) {
 
         ColaCharcuteria cc = new ColaCharcuteria();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 1; i <= 10; i++) {
             Thread hilo = new Thread(cc);
             hilo.setName("cliente "+i);
             hilo.start();
