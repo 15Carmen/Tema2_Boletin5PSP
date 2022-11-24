@@ -23,9 +23,6 @@ public class ColaCharcuteria implements Runnable{
     public static Semaphore semaforoCarniceria = new Semaphore(4);
     public static Semaphore semaforoCharcuteria = new Semaphore(2);
 
-    public static boolean atendidoCarniceria =false;
-    public static boolean atendidoCharcuteria =false;
-
 
     public static void carniceria(){
 
@@ -57,6 +54,9 @@ public class ColaCharcuteria implements Runnable{
 
     @Override
     public void run() {
+
+        boolean atendidoCarniceria =false;
+        boolean atendidoCharcuteria =false;
 
         while(!atendidoCarniceria && !atendidoCharcuteria) {
             if(semaforoCarniceria.availablePermits()>0 && !atendidoCarniceria) {
